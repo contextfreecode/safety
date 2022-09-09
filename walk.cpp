@@ -7,7 +7,7 @@
 struct Node {
     std::string name;
     std::vector<Node> kids;
-    std::weak_ptr<Node> parent;
+    std::weak_ptr<Node> parent; // TODO std::optional?
 };
 
 auto walk(
@@ -31,6 +31,9 @@ auto process() -> Node& {
         }},
         {"four"},
     }};
+    // auto& node = tree.kids[0];
+    // tree.kids.push_back({"five"});
+    // std::cout << node.name << "\n";
     // std::cout << tree.parent.lock()->name << "\n";
     walk(tree, [](const auto& node, int depth) {
         std::cout << std::string(2 * depth, ' ') << node.name << "\n";
