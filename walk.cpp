@@ -7,8 +7,16 @@
 struct Node {
     std::string name;
     std::vector<Node> kids;
-    std::weak_ptr<Node> parent; // TODO std::optional?
+    // std::weak_ptr<Node> parent; // TODO std::optional?
+    Node* parent; // TODO = nullptr; // TODO std::optional?
 };
+
+auto init_parents(Node* tree) -> void {
+    for (auto& kid : tree->kids) {
+        kid.parent = tree;
+        init_parents(&kid);
+    }
+}
 
 auto walk(
     const Node& tree,
@@ -35,6 +43,8 @@ auto process() -> Node& {
     // tree.kids.push_back({"five"});
     // std::cout << node.name << "\n";
     // std::cout << tree.parent.lock()->name << "\n";
+    // std::cout << tree.parent->name << "\n";
+    init_parents(&tree);
     walk(tree, [](const auto& node, int depth) {
         std::cout << std::string(2 * depth, ' ') << node.name << "\n";
     });
