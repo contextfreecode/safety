@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
 struct Node {
@@ -31,20 +31,20 @@ fn init_parents(tree: Rc<RefCell<Node>>) {
     }
 }
 
-fn walk_depth<Action>(tree: Rc<RefCell<Node>>, action: &Action, depth: usize)
+fn walk_depth<Action>(tree: Ref<Node>, action: &Action, depth: usize)
 where
     Action: Fn(&Node, usize),
 {
-    action(&tree.borrow(), depth);
-    let kids = &tree.borrow().kids;
+    action(&tree, depth);
+    let kids = &tree.kids;
     // for kid in &kids {
     for i in 0..kids.len() {
         let kid = &kids[i];
-        walk_depth(kid.clone(), action, depth + 1);
+        walk_depth(kid.borrow(), action, depth + 1);
     }
 }
 
-fn walk<Action: Fn(&Node, usize)>(tree: Rc<RefCell<Node>>, action: &Action) {
+fn walk<Action: Fn(&Node, usize)>(tree: Ref<Node>, action: &Action) {
     walk_depth(tree, action, 0);
 }
 
@@ -74,7 +74,7 @@ fn process() {
     // tree.kids.push(Node::leaf("five"));
     // println!("{}", node.name);
     // tree.parent = Some(&tree);
-    walk(tree, &|node, depth| {
+    walk(tree.borrow(), &|node, depth| {
         println!("{:depth$}{name}", "", depth = 2 * depth, name = node.name);
     });
     // &tree
