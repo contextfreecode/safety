@@ -1,14 +1,15 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 struct Node {
     std::string name;
     std::vector<Node> kids;
-    // std::weak_ptr<Node> parent; // TODO std::optional?
-    Node* parent; // TODO = nullptr; // TODO std::optional?
+    Node* parent; // TODO = nullptr;
+    // std::optional<std::reference_wrapper<Node>> parent;
 };
 
 auto init_parents(Node& tree) -> void {
@@ -31,6 +32,20 @@ auto walk(
     } // TODO Explore indentation warning sans curlies?
 }
 
+auto print(const Node& tree) -> void {
+    walk(tree, [](const auto& node, auto depth) {
+        std::cout << std::string(2 * depth, ' ') << node.name << "\n";
+    });
+}
+
+auto calc_total_depth(const Node& tree) -> int {
+    auto total = 0;
+    walk(tree, [&total](const auto& _, auto depth) {
+        total += depth;
+    });
+    return total;
+}
+
 auto process(Node& intro) -> Node& {
     auto tree = Node {"root", {
         intro,
@@ -44,9 +59,12 @@ auto process(Node& intro) -> Node& {
     auto& internal_intro = tree.kids[0];
     // tree.kids.push_back({"outro"});
     // std::cout << internal_intro.name << "\n";
-    walk(tree, [](const auto& node, int depth) {
-        std::cout << std::string(2 * depth, ' ') << node.name << "\n";
-    });
+    print(tree);
+    auto total_depth = 0;
+    for (auto i = 0; i < 200'000; i += 1) {
+        total_depth += calc_total_depth(tree);
+    }
+    std::cout << "Total depth: " << total_depth << "\n";
     return internal_intro;
 }
 
@@ -54,4 +72,5 @@ auto main() -> int {
     auto intro = Node {"intro"};
     process(intro);
     // std::cout << intro.parent->name << "\n";
+    // std::cout << intro.parent->get().name << "\n";
 }
