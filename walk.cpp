@@ -11,10 +11,10 @@ struct Node {
     Node* parent; // TODO = nullptr; // TODO std::optional?
 };
 
-auto init_parents(Node* tree) -> void {
-    for (auto& kid : tree->kids) {
-        kid.parent = tree;
-        init_parents(&kid);
+auto init_parents(Node& tree) -> void {
+    for (auto& kid : tree.kids) {
+        kid.parent = &tree;
+        init_parents(kid);
     }
 }
 
@@ -26,35 +26,32 @@ auto walk(
     action(tree, depth);
     // for (const auto& kid : tree.kids) {
     for (size_t i = 0; i < tree.kids.size(); i += 1) {
-        const auto& kid = tree.kids[i];
+        const auto& kid = tree.kids[i]; // .at(i)
         walk(kid, action, depth + 1);
     } // TODO Explore indentation warning sans curlies?
 }
 
-auto process() -> Node& {
+auto process(Node& intro) -> Node& {
     auto tree = Node {"root", {
+        intro,
         {"one", {
             {"two"},
             {"three"},
         }},
         {"four"},
     }};
-    // auto& node = tree.kids[0];
-    // tree.kids.push_back({"five"});
-    // std::cout << node.name << "\n";
-    // std::cout << tree.parent.lock()->name << "\n";
-    // std::cout << tree.parent->name << "\n";
-    init_parents(&tree);
+    init_parents(tree);
+    auto& internal_intro = tree.kids[0];
+    // tree.kids.push_back({"outro"});
+    // std::cout << internal_intro.name << "\n";
     walk(tree, [](const auto& node, int depth) {
         std::cout << std::string(2 * depth, ' ') << node.name << "\n";
     });
-    return tree.kids[0];
-    // return tree;
+    return internal_intro;
 }
 
 auto main() -> int {
-    process();
-    // auto& tree = process();
-    // Can cause arbitrary output.
-    // std::cout << tree.name << "\n";
+    auto intro = Node {"intro"};
+    process(intro);
+    // std::cout << intro.parent->name << "\n";
 }
