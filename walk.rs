@@ -1,3 +1,4 @@
+#[derive(Clone)]
 struct Node {
     name: String,
     kids: Vec<Node>,
@@ -18,9 +19,16 @@ impl Node {
     }
 }
 
-fn walk_depth<Action>(tree: &Node, action: &Action, depth: usize)
+// fn init_parents(tree: &mut Node) {
+//     for kid in &mut tree.kids {
+//         kid.parent = Some(&tree);
+//         init_parents(kid);
+//     }
+// }
+
+fn walk_depth<Action>(tree: &Node, action: &mut Action, depth: usize)
 where
-    Action: Fn(&Node, usize),
+    Action: FnMut(&Node, usize),
 {
     action(tree, depth);
     // for kid in &tree.kids {
@@ -30,30 +38,50 @@ where
     }
 }
 
-fn walk<Action: Fn(&Node, usize)>(tree: &Node, action: &Action) {
+fn walk<Action: FnMut(&Node, usize)>(tree: &Node, action: &mut Action) {
     walk_depth(tree, action, 0);
 }
 
-fn process() {
-    // -> &'a Node {
+fn print_tree(tree: &Node) {
+    walk(tree, &mut |node, depth| {
+        println!("{:depth$}{name}", "", depth = 2 * depth, name = node.name);
+    });
+}
+
+fn calc_total_depth(tree: &Node) -> usize {
+    let mut total = 0;
+    walk(tree, &mut |_node, depth| {
+        total += depth;
+    });
+    total
+}
+
+fn process(intro: &Node) {
+    // -> &Node {
     let tree = Node::parent(
         "root",
         vec![
+            intro.clone(),
             Node::parent("one", vec![Node::leaf("two"), Node::leaf("three")]),
             Node::leaf("four"),
         ],
     );
-    // let node = &tree.kids[0];
-    // tree.kids.push(Node::leaf("five"));
-    // println!("{}", node.name);
-    // tree.parent = Some(&tree);
-    walk(&tree, &|node, depth| {
-        println!("{:depth$}{name}", "", depth = 2 * depth, name = node.name);
-    });
+    // init_parents(&mut tree);
+    // let internal_intro = &tree.kids[0];
+    // tree.kids.push(Node::leaf("outro"));
+    // println!("{}", internal_intro.name);
+    // internal_intro.parent = Some(&tree);
+    print_tree(&tree);
+    let mut total_depth = 0;
+    for _ in 0..200_000 {
+        total_depth += calc_total_depth(&tree);
+    }
+    println!("Total depth: {total_depth}");
     // &tree
-    // &tree.kids[0]
+    // internal_intro
 }
 
 fn main() {
-    process();
+    let intro = Node::leaf("intro");
+    process(&intro);
 }

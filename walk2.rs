@@ -1,4 +1,4 @@
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 struct Node {
@@ -12,16 +12,17 @@ impl Node {
         Node::parent(name, vec![])
     }
 
-    fn parent(name: &str, kids: Vec<Node>) -> Node {
+    fn parent(name: &str, kids: Vec<Rc<RefCell<Node>>>) -> Node {
         Node {
             name: name.into(),
-            kids: kids
-                .into_iter()
-                .map(|kid| Rc::new(RefCell::new(kid)))
-                .collect(),
+            kids: kids,
             parent: None,
         }
     }
+}
+
+fn rc_ref_cell<Value>(value: Value) -> Rc<RefCell<Value>> {
+    Rc::new(RefCell::new(value))
 }
 
 fn init_parents(tree: Rc<RefCell<Node>>) {
@@ -31,36 +32,71 @@ fn init_parents(tree: Rc<RefCell<Node>>) {
     }
 }
 
-fn walk_depth<Action>(tree: Ref<Node>, action: &Action, depth: usize)
+fn walk_depth<Action>(tree: &Node, action: &mut Action, depth: usize)
 where
-    Action: Fn(&Node, usize),
+    Action: FnMut(&Node, usize),
 {
-    action(&tree, depth);
+    action(tree, depth);
     let kids = &tree.kids;
-    // for kid in &kids {
+    // for kid in kids {
     for i in 0..kids.len() {
         let kid = &kids[i];
-        walk_depth(kid.borrow(), action, depth + 1);
+        walk_depth(&kid.borrow(), action, depth + 1);
     }
 }
 
-fn walk<Action: Fn(&Node, usize)>(tree: Ref<Node>, action: &Action) {
-    walk_depth(tree, action, 0);
+fn walk<Action: FnMut(&Node, usize)>(tree: &Node, action: &mut Action) {
+    walk_depth(&tree, action, 0);
 }
 
-fn process() {
-    // -> &'a Node {
-    let tree = Rc::new(RefCell::new(Node::parent(
+fn print_tree(tree: &Node) {
+    walk(tree, &mut |node, depth| {
+        println!("{:depth$}{name}", "", depth = 2 * depth, name = node.name);
+    });
+}
+
+fn calc_total_depth(tree: &Node) -> usize {
+    let mut total = 0;
+    walk(tree, &mut |_node, depth| {
+        total += depth;
+    });
+    total
+}
+
+fn process(intro: Rc<RefCell<Node>>) -> Rc<RefCell<Node>> {
+    let tree = rc_ref_cell(Node::parent(
         "root",
         vec![
-            Node::parent("one", vec![Node::leaf("two"), Node::leaf("three")]),
-            Node::leaf("four"),
+            intro,
+            rc_ref_cell(Node::parent(
+                "one",
+                vec![
+                    rc_ref_cell(Node::leaf("two")),
+                    rc_ref_cell(Node::leaf("three")),
+                ],
+            )),
+            rc_ref_cell(Node::leaf("four")),
         ],
-    )));
+    ));
     init_parents(tree.clone());
+    // let internal_intro = tree.borrow().kids[0].clone();
+    // tree.borrow_mut().kids.push(rc_ref_cell(Node::leaf("outro")));
+    // println!("{}", internal_intro.borrow().name);
+    print_tree(&tree.borrow());
+    let mut total_depth = 0;
+    for _ in 0..200_000 {
+        total_depth += calc_total_depth(&tree.borrow());
+    }
+    println!("Total depth: {total_depth}");
+    tree
+}
+
+fn main() {
+    let intro = rc_ref_cell(Node::leaf("intro"));
+    let _tree = process(intro.clone());
     println!(
         "{}",
-        tree.borrow().kids[0]
+        intro
             .borrow()
             .parent
             .as_ref()
@@ -70,17 +106,4 @@ fn process() {
             .borrow()
             .name
     );
-    // let node = &tree.kids[0];
-    // tree.kids.push(Node::leaf("five"));
-    // println!("{}", node.name);
-    // tree.parent = Some(&tree);
-    walk(tree.borrow(), &|node, depth| {
-        println!("{:depth$}{name}", "", depth = 2 * depth, name = node.name);
-    });
-    // &tree
-    // &tree.kids[0]
-}
-
-fn main() {
-    process();
 }

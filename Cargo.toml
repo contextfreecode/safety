@@ -4,10 +4,12 @@ version = "0.1.0"
 authors = ["Tom <tom@contextfree.info>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 
 [[bin]]
 name = "walk"
 path = "walk.rs"
+
+[[bin]]
+name = "walk2"
+path = "walk2.rs"
