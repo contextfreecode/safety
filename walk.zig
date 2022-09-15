@@ -34,21 +34,22 @@ fn initParents(tree: *Node) void {
     }
 }
 
-fn walkDepth(tree: Node, comptime action: fn (Node, usize) void, depth: usize) void {
-    action(tree, depth);
-    for (tree.kids.items) |kid| {
-    // var i = @as(usize, 0);
-    // while (i < depth) : (i += 1) {
-    //     const kid = tree.kids.items[i];
-        walkDepth(kid, action, depth + 1);
+fn walkDepth(comptime Result: type, value: Result, tree: Node, comptime action: fn (Result, Node, usize) Result, depth: usize) Result {
+    var result = action(value, tree, depth);
+    // for (tree.kids.items) |kid| {
+    var i = @as(usize, 0);
+    while (i < tree.kids.items.len) : (i += 1) {
+        const kid = tree.kids.items[i];
+        result = walkDepth(Result, result, kid, action, depth + 1);
     }
+    return result;
 }
 
-fn walk(tree: Node, comptime action: fn (Node, usize) void) void {
-    walkDepth(tree, action, 0);
+fn walk(comptime Result: type, value: Result, tree: Node, comptime action: fn (Result, Node, usize) Result) Result {
+    return walkDepth(Result, value, tree, action, 0);
 }
 
-fn printNode(node: Node, depth: usize) void {
+fn printNode(_: void, node: Node, depth: usize) void {
     var i = @as(usize, 0);
     while (i < 2 * depth) : (i += 1) {
         print(" ", .{});
@@ -57,10 +58,19 @@ fn printNode(node: Node, depth: usize) void {
 }
 
 fn printTree(tree: Node) void {
-    walk(tree, printNode);
+    var v: void = undefined;
+    walk(void, v, tree, printNode);
 }
 
-fn process(intro: *Node) !void {
+fn calcTotalDepthNode(total: usize, _: Node, depth: usize) usize {
+    return total + depth;
+}
+
+fn calcTotalDepth(tree: Node) usize {
+    return walk(usize, 0, tree, calcTotalDepthNode);
+}
+
+fn process(intro: *Node) !Node {
     const allocator = intro.kids.allocator;
     var tree = try Node.parent(allocator, "root", &.{
         intro.*,
@@ -70,12 +80,20 @@ fn process(intro: *Node) !void {
         }),
         Node.leaf(allocator, "four"),
     });
-    defer tree.deinit();
+    // defer tree.deinit();
     initParents(&tree);
     const internal_intro = &tree.kids.items[0];
     // try tree.kids.append(Node.leaf(allocator, "outro"));
     print("{s}\n", .{internal_intro.name});
     printTree(tree);
+    var total_depth = @as(usize, 0);
+    var calc_repeats = @as(usize, 0);
+    while (calc_repeats < 2) : (calc_repeats += 1) {
+        total_depth += calcTotalDepth(tree);
+    }
+    print("Total depth: {}\n", .{total_depth});
+    // return internal_intro;
+    return tree;
 }
 
 pub fn main() !void {
@@ -83,5 +101,8 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
     var intro = Node.leaf(allocator, "intro");
-    try process(&intro);
+    const tree = try process(&intro);
+    defer tree.deinit();
+    _ = tree;
+    print("{s}\n", .{tree.name});
 }

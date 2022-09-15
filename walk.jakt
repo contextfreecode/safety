@@ -1,0 +1,10 @@
+class Node {
+    public name: String,
+    public kids: [Node],
+    public parent: weak Node?,
+}
+
+function main() {
+    let node = Node(name: "root", kids: [], parent: None);
+    print("Hi!\n")
+}
