@@ -4,7 +4,7 @@ use std::rc::{Rc, Weak};
 struct Node {
     name: String,
     kids: Vec<Rc<RefCell<Node>>>,
-    parent: Option<Weak<RefCell<Node>>>,
+    parent: Weak<RefCell<Node>>,
 }
 
 impl Node {
@@ -16,7 +16,7 @@ impl Node {
         Node {
             name: name.into(),
             kids: kids,
-            parent: None,
+            parent: Weak::new(),
         }
     }
 }
@@ -27,7 +27,7 @@ fn rc_ref_cell<Value>(value: Value) -> Rc<RefCell<Value>> {
 
 fn init_parents(tree: Rc<RefCell<Node>>) {
     for kid in &tree.borrow_mut().kids {
-        kid.borrow_mut().parent = Some(Rc::downgrade(&tree));
+        kid.borrow_mut().parent = Rc::downgrade(&tree);
         init_parents(kid.clone());
     }
 }
@@ -94,16 +94,5 @@ fn process(intro: Rc<RefCell<Node>>) -> Rc<RefCell<Node>> {
 fn main() {
     let intro = rc_ref_cell(Node::leaf("intro"));
     let _tree = process(intro.clone());
-    println!(
-        "{}",
-        intro
-            .borrow()
-            .parent
-            .as_ref()
-            .unwrap()
-            .upgrade()
-            .unwrap()
-            .borrow()
-            .name
-    );
+    println!("{}", intro.borrow().parent.upgrade().unwrap().borrow().name);
 }

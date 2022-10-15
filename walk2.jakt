@@ -1,22 +1,22 @@
-struct Node {
+class Node {
     public name: String
     public kids: [Node]
-    // public parent: weak Node?
+    public parent: weak Node?
 
     public function leaf(anon name: String) throws -> Node {
-        return Node(name, kids: [])
+        return Node(name, kids: [], parent: None)
     }
 
     public function parenting(anon name: String, anon kids: [Node]) throws =>
-        Node(name, kids)
+        Node(name, kids, parent: None)
 }
 
-// function init_parents(anon mut tree: Node) -> void {
-//     for kid in tree.kids.iterator() {
-//         kid.parent = tree
-//         init_parents(kid)
-//     }
-// }
+function init_parents(anon mut tree: Node) -> void {
+    for kid in tree.kids.iterator() {
+        kid.parent = tree
+        init_parents(kid)
+    }
+}
 
 function walk(
     anon tree: &Node
@@ -46,16 +46,16 @@ function calc_total_depth(anon tree: &Node) -> i64 {
     return total
 }
 
-function process(intro: &Node) throws -> Node {
+function process(intro: Node) throws -> Node {
     mut tree = Node::parenting("root", [
-        *intro,
+        intro,
         Node::parenting("one", [
             Node::leaf("two"),
             Node::leaf("three"),
         ]),
         Node::leaf("four"),
     ])
-    // init_parents(tree)
+    init_parents(tree)
     let internal_intro = tree.kids[0]
     tree.kids.push(Node::leaf("outro"))
     println("{}", internal_intro.name)
@@ -73,6 +73,6 @@ function main() {
     let intro = Node::leaf("intro")
     // println("Hi: {}", intro)
     let tree = process(intro)
-    // println("{}", intro.parent!.name)
+    println("{}", intro.parent!.name)
     // println("{}", tree.parent!.name)
 }
