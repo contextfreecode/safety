@@ -34,7 +34,13 @@ fn initParents(tree: *Node) void {
     }
 }
 
-fn walkDepth(comptime Result: type, value: Result, tree: Node, comptime action: fn (Result, Node, usize) Result, depth: usize) Result {
+fn walkDepth(
+    comptime Result: type,
+    value: Result,
+    tree: Node,
+    comptime action: fn (Result, Node, usize) Result,
+    depth: usize
+) Result {
     var result = action(value, tree, depth);
     // for (tree.kids.items) |kid| {
     var i = @as(usize, 0);
@@ -45,7 +51,12 @@ fn walkDepth(comptime Result: type, value: Result, tree: Node, comptime action: 
     return result;
 }
 
-fn walk(comptime Result: type, value: Result, tree: Node, comptime action: fn (Result, Node, usize) Result) Result {
+fn walk(
+    comptime Result: type,
+    value: Result,
+    tree: Node,
+    comptime action: fn (Result, Node, usize) Result
+) Result {
     return walkDepth(Result, value, tree, action, 0);
 }
 
