@@ -67,10 +67,12 @@ fn process(intro: &Node) {
         ],
     );
     // init_parents(&mut tree);
-    // let internal_intro = &tree.kids[0];
+    // Test pointer stability.
+    let internal_intro = &tree.kids[0];
     // tree.kids.push(Node::leaf("outro"));
-    // println!("{}", internal_intro.name);
+    print_tree(&internal_intro);
     // internal_intro.parent = Some(&tree);
+    // Print and calculate.
     print_tree(&tree);
     let mut total_depth = 0;
     for _ in 0..200_000 {

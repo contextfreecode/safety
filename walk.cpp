@@ -15,6 +15,7 @@ struct Node {
 auto init_parents(Node& tree) -> void {
     for (auto& kid : tree.kids) {
         kid.parent = &tree;
+        // kid.parent = tree;
         init_parents(kid);
     }
 }
@@ -56,9 +57,11 @@ auto process(Node& intro) -> Node& {
         {"four"},
     }};
     init_parents(tree);
+    // Test pointer stability.
     auto& internal_intro = tree.kids[0];
     // tree.kids.push_back({"outro"});
-    // std::cout << internal_intro.name << "\n";
+    print(internal_intro);
+    // Print and calculate.
     print(tree);
     auto total_depth = 0;
     for (auto i = 0; i < 200'000; i += 1) {
@@ -70,7 +73,9 @@ auto process(Node& intro) -> Node& {
 
 auto main() -> int {
     auto intro = Node {"intro"};
+    // auto& internal_intro =
     process(intro);
+    // print(intro);
     // std::cout << intro.parent->name << "\n";
-    // std::cout << intro.parent->get().name << "\n";
+    // std::cout << intro.parent.value().get().name << "\n";
 }

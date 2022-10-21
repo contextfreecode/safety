@@ -1,3 +1,10 @@
+bin/
 build/
+obj/
 target/
 zig-cache/
+*.class
+env.sh
+notes.txt
+walk
+walk2

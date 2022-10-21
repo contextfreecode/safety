@@ -66,7 +66,7 @@ public class Walk {
                         new Node("three"))),
                 new Node("four")));
         initParents(tree);
-        // Prove pointer stability.
+        // Test pointer stability.
         var internalIntro = tree.kids.get(0);
         tree.kids.add(new Node("outro"));
         System.out.println(internalIntro.name);

@@ -1,13 +1,20 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-class Walker {
-    record struct Node(
+class Walker2 {
+    record class Node(
         string Name,
         List<Node> Kids
-    // Node parent
     ) {
+        public WeakReference<Node?> Parent = new WeakReference<Node?>(null);
         public Node(string name) : this(name, new()) { }
+    }
+
+    void InitParents(Node tree) {
+        foreach (var kid in tree.Kids) {
+            kid.Parent.SetTarget(tree);
+            InitParents(kid);
+        }
     }
 
     delegate void WalkAction(Node node, int depth);
@@ -43,6 +50,7 @@ class Walker {
             }),
             new("four"),
         });
+        InitParents(tree);
         // Test pointer stability.
         // var nodes = CollectionsMarshal.AsSpan(tree.Kids);
         var internalIntro = tree.Kids[0];
@@ -62,9 +70,13 @@ class Walker {
     void Run() {
         var intro = new Node("intro");
         Process(intro);
+        // System.GC.Collect();
+        Node? root = null;
+        intro.Parent.TryGetTarget(out root);
+        Console.WriteLine(root.Name);
     }
 
     static void Main(string[] args) {
-        new Walker().Run();
+        new Walker2().Run();
     }
 }

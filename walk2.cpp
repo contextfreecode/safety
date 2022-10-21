@@ -53,9 +53,11 @@ auto process(std::shared_ptr<Node> intro) -> std::shared_ptr<Node> {
         std::make_shared<Node>(Node {"four"}),
     }});
     init_parents(tree);
-    // auto internal_intro = tree->kids[0];
-    // tree->kids.push_back(std::make_shared<Node>(Node {"outro"}));
-    // std::cout << internal_intro->name << "\n";
+    // Test pointer stability.
+    auto internal_intro = tree->kids[0];
+    tree->kids.push_back(std::make_shared<Node>(Node {"outro"}));
+    print(*internal_intro);
+    // Print and calculate.
     print(*tree);
     auto total_depth = 0;
     for (auto i = 0; i < 200'000; i += 1) {

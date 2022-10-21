@@ -79,9 +79,11 @@ fn process(intro: Rc<RefCell<Node>>) -> Rc<RefCell<Node>> {
         ],
     ));
     init_parents(tree.clone());
-    // let internal_intro = tree.borrow().kids[0].clone();
-    // tree.borrow_mut().kids.push(rc_ref_cell(Node::leaf("outro")));
-    // println!("{}", internal_intro.borrow().name);
+    // Test pointer stability.
+    let internal_intro = tree.borrow().kids[0].clone();
+    tree.borrow_mut().kids.push(rc_ref_cell(Node::leaf("outro")));
+    print_tree(&internal_intro.borrow());
+    // Print and calculate.
     print_tree(&tree.borrow());
     let mut total_depth = 0;
     for _ in 0..200_000 {
