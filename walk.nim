@@ -1,10 +1,10 @@
 import std/strutils
 
 type
-  Node = ref object
+  Node {.acyclic.} = ref object
     name: string
     kids: seq[Node]
-    parent: Node
+    parent {.cursor.}: Node
 
 proc initParents(tree: Node) =
   for kid in tree.kids:
