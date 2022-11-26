@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Runtime.InteropServices;
 
 class Walker2 {
     record class Node(
@@ -52,11 +51,8 @@ class Walker2 {
         });
         InitParents(tree);
         // Test pointer stability.
-        // var nodes = CollectionsMarshal.AsSpan(tree.Kids);
         var internalIntro = tree.Kids[0];
         tree.Kids.Add(new("outro"));
-        // tree.Kids.Clear();
-        // Print(nodes[0]);
         Print(internalIntro);
         // Print tree and calculate.
         Print(tree);

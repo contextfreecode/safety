@@ -1,11 +1,14 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
+// sealed record class Box<T>(T Value) where T : struct {}
+
 class Walker {
     record struct Node(
         string Name,
         List<Node> Kids
-    // Node parent
+        // Node parent
+        // Box<Node>? parent = null
     ) {
         public Node(string name) : this(name, new()) { }
     }
@@ -64,7 +67,7 @@ class Walker {
         Process(intro);
     }
 
-    static void Main(string[] args) {
-        new Walker().Run();
-    }
+    // static void Main(string[] args) {
+    //     new Walker().Run();
+    // }
 }

@@ -11,6 +11,10 @@ const Node = struct {
         return parent(allocator, name, &.{}) catch unreachable;
     }
 
+    fn leafNew(allocator: Allocator, name: []const u8) !*Node {
+        return try dupe(allocator, Node, leaf(allocator, name));
+    }
+
     fn parent(allocator: Allocator, name: []const u8, kids: []Node) !Node {
         var kids_list = std.ArrayList(*Node).init(allocator);
         try kids_list.ensureTotalCapacityPrecise(kids.len);
@@ -111,7 +115,7 @@ fn process(intro: *Node) !*Node {
     // defer tree.destroy();
     initParents(tree);
     const internal_intro = tree.kids.items[0];
-    // try tree.kids.append(Node.leaf(allocator, "outro"));
+    try tree.kids.append(try Node.leafNew(allocator, "outro"));
     print("{s}\n", .{internal_intro.name});
     printTree(tree.*);
     var total_depth = @as(usize, 0);

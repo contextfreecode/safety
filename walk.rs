@@ -62,7 +62,10 @@ fn process(intro: &Node) {
         "root",
         vec![
             intro.clone(),
-            Node::parent("one", vec![Node::leaf("two"), Node::leaf("three")]),
+            Node::parent("one", vec![
+                Node::leaf("two"),
+                Node::leaf("three"),
+            ]),
             Node::leaf("four"),
         ],
     );

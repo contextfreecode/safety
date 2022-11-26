@@ -28,7 +28,7 @@ auto walk(
     action(tree, depth);
     // for (const auto& kid : tree.kids) {
     for (size_t i = 0; i < tree.kids.size(); i += 1) {
-        const auto& kid = tree.kids[i]; // .at(i)
+        const auto& kid = tree.kids[i]; // .at(i);
         walk(kid, action, depth + 1);
     } // TODO Explore indentation warning sans curlies?
 }
